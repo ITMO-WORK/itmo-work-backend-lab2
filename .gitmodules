@@ -1,3 +1,3 @@
 [submodule "configs-repo"]
-	path = itmo-work-configs-repo
+	path = itmo-work-configs-repo-lab2
 	url = https://github.com/ITMO-WORK/itmo-work-configs-repo-lab2
