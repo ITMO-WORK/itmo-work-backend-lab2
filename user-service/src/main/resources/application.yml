@@ -1,13 +1,13 @@
-server:
-  port: ${PORT:8081}
+
 spring:
   application:
     name: user-service
   profiles:
     active: ${PROFILE:dev}
+  jackson:
+    property-naming-strategy: SNAKE_CASE
 
   config:
     activate:
       on-profile: dev
     import: optional:configserver:http://localhost:${CONFIG_SERVER_PORT:9991}
-
