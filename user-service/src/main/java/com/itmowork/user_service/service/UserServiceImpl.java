@@ -36,9 +36,8 @@ public class UserServiceImpl implements UserService {
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
-    @Override
-    public Mono<Boolean> existsUserById(UUID id) {
-        return Mono.fromCallable(() -> userRepository.existsById(id))
+    public Mono<UserResponseDto> findUserById(UUID id) {
+        return Mono.fromCallable(() -> userRepository.findUserById(id))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
