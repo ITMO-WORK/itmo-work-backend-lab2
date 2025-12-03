@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface UserService {
 
     Mono<UserResponseDto> createUser(UserRequestDto userRequestDto);
-    Mono<Boolean> existsUserById(UUID id);
+    Mono<UserResponseDto> findUserById(UUID id);
 
 
 }

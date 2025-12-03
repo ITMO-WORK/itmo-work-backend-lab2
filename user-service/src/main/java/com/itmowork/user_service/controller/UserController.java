@@ -27,8 +27,8 @@ public class UserController {
 
     }
 
-    @GetMapping("/exists/{id}")
-    public Mono<Boolean> existsUserById(@PathVariable UUID id){
-        return userService.existsUserById(id);
+    @GetMapping("/{id}")
+    public Mono<UserResponseDto> findUserById(@PathVariable UUID id){
+        return userService.findUserById(id);
     }
 }
