@@ -1,10 +1,7 @@
 package org.itmowork.vacancy_service.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.itmowork.vacancy_service.exception.exceptions.CurrencyNotFoundException;
-import org.itmowork.vacancy_service.exception.exceptions.InvalidVacancySalaryException;
-import org.itmowork.vacancy_service.exception.exceptions.VacancyNotFoundException;
-import org.itmowork.vacancy_service.exception.exceptions.VacancyStatusNotFoundException;
+import org.itmowork.vacancy_service.exception.exceptions.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,6 +11,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(CompanyNotFoundException.class)
+    public ResponseEntity<ProblemDetail> CompanyNotFoundException(CompanyNotFoundException e, HttpServletRequest request) {
+        ProblemDetail body = ProblemDetailsUtils.problemDetail(HttpStatus.BAD_REQUEST, e.getMessage(), "", request);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
 
     @ExceptionHandler(VacancyNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleVacancyNotFoundException(VacancyNotFoundException e, HttpServletRequest request) {
@@ -30,13 +33,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(VacancyStatusNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleVacancyStatusNotFoundException(VacancyStatusNotFoundException e, HttpServletRequest request) {
         ProblemDetail body = ProblemDetailsUtils.problemDetail(HttpStatus.BAD_REQUEST, "Vacancy status was not found", "", request);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(CurrencyNotFoundException.class)
     public ResponseEntity<ProblemDetail> CurrencyNotFoundException(CurrencyNotFoundException e, HttpServletRequest request) {
         ProblemDetail body = ProblemDetailsUtils.problemDetail(HttpStatus.BAD_REQUEST, e.getMessage(), "", request);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @Override

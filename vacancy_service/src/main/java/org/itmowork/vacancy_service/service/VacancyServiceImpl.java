@@ -1,11 +1,16 @@
 package org.itmowork.vacancy_service.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.itmowork.vacancy_service.dto.request.VacancyCreateRequestDto;
 import org.itmowork.vacancy_service.dto.request.VacancyUpdateRequestDto;
+import org.itmowork.vacancy_service.dto.response.CompanyResponseDto;
 import org.itmowork.vacancy_service.dto.response.VacancyResponseDto;
+import org.itmowork.vacancy_service.exception.exceptions.CompanyNotFoundException;
 import org.itmowork.vacancy_service.exception.exceptions.InvalidVacancySalaryException;
 import org.itmowork.vacancy_service.exception.exceptions.VacancyNotFoundException;
+import org.itmowork.vacancy_service.infrastructure.feign.CompanyClient;
+import org.itmowork.vacancy_service.model.Currency;
 import org.itmowork.vacancy_service.model.Vacancy;
 import org.itmowork.vacancy_service.model.VacancyStatus;
 import org.itmowork.vacancy_service.model.VacancyStatusName;
@@ -17,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -26,6 +32,7 @@ public class VacancyServiceImpl implements VacancyService {
     private final VacancyRepository vacancyRepository;
     private final VacancyStatusService vacancyStatusService;
     private final CurrencyService currencyService;
+    private final CompanyClient companyClient;
 
     @Override
     public Page<VacancyResponseDto> getAllPublishedVacancies(Pageable pageable) {
@@ -58,10 +65,38 @@ public class VacancyServiceImpl implements VacancyService {
 //        return null;
 //    }
 //
-//    @Override
-//    public VacancyResponseDto createVacancy(UUID userId, VacancyCreateRequestDto request, VacancyStatusName statusName) {
-//        return null;
-//    }
+    @Override
+    @Transactional
+    public VacancyResponseDto createVacancy(UUID userId, VacancyCreateRequestDto request, VacancyStatusName statusName) {
+
+        Boolean exists = companyClient.existsCompany(request.companyId());
+        if (exists == null || !exists) {
+            throw new CompanyNotFoundException("Company with id " + request.companyId() + " does not exist");
+        }
+
+        Boolean owns = companyClient.validateCompanyOwnership(request.companyId(), userId);
+        if (owns == null || !owns) {
+            throw new CompanyNotFoundException("User does not own this company");
+        }
+
+        Currency currency = currencyService.findCurrencyById(request.currencyId());
+        VacancyStatus vacancyStatus = vacancyStatusService.findByVacancyStatusName(statusName);
+        validateSalaryBounds(request.salaryFrom(), request.salaryTo());
+
+        Vacancy vacancy = Vacancy.builder()
+                .title(request.title())
+                .description(request.description())
+                .salaryFrom(request.salaryFrom())
+                .salaryTo(request.salaryTo())
+                .createdAt(LocalDateTime.now())
+                .companyId(request.companyId())
+                .status(vacancyStatus)
+                .currency(currency)
+                .build();
+
+        Vacancy saved = vacancyRepository.save(vacancy);
+        return buildResponse(saved);
+    }
 
     @Override
     public Vacancy getReferenceById(UUID vacancyId) {
@@ -80,8 +115,16 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public UUID findCompanyByVacancyId(UUID vacancyId) {
-        return vacancyRepository.findCompanyIdById(vacancyId);
+    public UUID findCompanyIdByVacancyId(UUID vacancyId) {
+        UUID companyId = vacancyRepository.findCompanyId(vacancyId);
+
+        if (companyId == null) {
+            throw new VacancyNotFoundException(
+                    "Vacancy with id=" + vacancyId + " not found"
+            );
+        }
+
+        return companyId;
     }
 
     private void validateSalaryBounds(Integer salaryFrom, Integer salaryTo) {

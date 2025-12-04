@@ -32,7 +32,7 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	testImplementation("io.projectreactor:reactor-test")
-//	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

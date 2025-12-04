@@ -19,4 +19,6 @@ public interface CompanyService {
     Mono<CompanyDeleteResponseDto> deleteCompany(UUID id, UUID userId);
 
     Mono<Page<CompanyResponseDto>> getAllCompanies(Pageable pageable);
+
+    Mono<Boolean> existsCompanyById(UUID id);
 }
