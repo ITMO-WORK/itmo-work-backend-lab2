@@ -203,6 +203,9 @@ public class VacancyServiceImpl implements VacancyService {
         }
 
         Currency currency = currencyService.findCurrencyById(request.currencyId());
+        if (currency == null) {
+            throw new CurrencyNotFoundException("Currency with id " + request.currencyId() + " not found");
+        }
         VacancyStatus vacancyStatus = vacancyStatusService.findByVacancyStatusName(statusName);
         validateSalaryBounds(request.salaryFrom(), request.salaryTo());
 
