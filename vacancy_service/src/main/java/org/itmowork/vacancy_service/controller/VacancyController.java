@@ -22,18 +22,24 @@ public class VacancyController {
 
     private final VacancyService vacancyService;
 
-//    @PostMapping("/{userId}/draft")
-//    public ResponseEntity<VacancyResponseDto> createDraftVacancy(
-//            @PathVariable UUID userId,
-//            @RequestBody @Valid VacancyCreateRequestDto request) {
-//
-//        VacancyResponseDto response = vacancyService.createVacancy(
-//                userId,
-//                request,
-//                VacancyStatusName.DRAFT
-//        );
-//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//    }
+    @GetMapping("/{vacancyId}/company-id")
+    public ResponseEntity<UUID> getCompanyIdByVacancy(@PathVariable UUID vacancyId) {
+        UUID companyId = vacancyService.findCompanyIdByVacancyId(vacancyId);
+        return ResponseEntity.ok(companyId);
+    }
+
+    @PostMapping("/{userId}/draft")
+    public ResponseEntity<VacancyResponseDto> createDraftVacancy(
+            @PathVariable UUID userId,
+            @RequestBody @Valid VacancyCreateRequestDto request) {
+
+        VacancyResponseDto response = vacancyService.createVacancy(
+                userId,
+                request,
+                VacancyStatusName.DRAFT
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 //
 //    @PostMapping("/{userId}/publish")
 //    public ResponseEntity<VacancyResponseDto> createPublishedVacancy(

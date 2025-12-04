@@ -18,7 +18,7 @@ public interface VacancyRepository extends JpaRepository<Vacancy, UUID> {
     Long findVacancyStatusById(UUID vacancyId);
 
     @Query("select v.companyId from Vacancy v where v.id = :vacancyId")
-    UUID findCompanyIdById(UUID vacancyId);
+    UUID findCompanyId(UUID vacancyId);
 
     @Query("select v from Vacancy v where v.status.vacancyStatusName = 'PUBLISHED'")
     Page<Vacancy> getAllPublished(Pageable pageable);

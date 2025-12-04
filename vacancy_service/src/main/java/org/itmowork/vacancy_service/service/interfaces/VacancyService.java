@@ -32,16 +32,16 @@ public interface VacancyService {
 //            VacancyStatusName newStatus
 //    );
 //
-//    VacancyResponseDto createVacancy(
-//            UUID userId,
-//            VacancyCreateRequestDto request,
-//            VacancyStatusName statusName
-//    );
+    VacancyResponseDto createVacancy(
+            UUID userId,
+            VacancyCreateRequestDto request,
+            VacancyStatusName statusName
+    );
 
     Vacancy getReferenceById(UUID vacancyId);
     boolean existsVacancyById(UUID id);
     VacancyStatus findCurrentVacancyStatusByVacancyId(UUID id);
-    UUID findCompanyByVacancyId(UUID vacancyId);
+    UUID findCompanyIdByVacancyId(UUID vacancyId);
     Page<VacancyResponseDto> getAllPublishedVacancies(Pageable pageable);
     String getVacancyTitle(UUID vacancyId);
     boolean isVacancyPublished(UUID vacancyId);
