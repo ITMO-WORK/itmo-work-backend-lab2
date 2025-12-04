@@ -34,6 +34,8 @@ dependencies {
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.13")
+	implementation("org.mapstruct:mapstruct:1.6.2")
+	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
 	implementation("org.liquibase:liquibase-core:5.0.1")
 	implementation("org.apache.commons:commons-lang3:3.18.0")
 	implementation("org.postgresql:r2dbc-postgresql")

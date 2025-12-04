@@ -2,11 +2,15 @@ package com.itmowork.company_service.service;
 
 import com.itmowork.company_service.client.UserClient;
 import com.itmowork.company_service.dto.request.CompanyRequestDto;
+import com.itmowork.company_service.dto.request.CompanyUpdateRequestDto;
 import com.itmowork.company_service.dto.request.UserRequestDto;
+import com.itmowork.company_service.dto.response.CompanyDeleteResponseDto;
 import com.itmowork.company_service.dto.response.CompanyResponseDto;
 import com.itmowork.company_service.dto.response.UserResponseDto;
 import com.itmowork.company_service.exception.exceptions.CompanyAlreadyExistsException;
+import com.itmowork.company_service.exception.exceptions.CompanyNotFoundException;
 import com.itmowork.company_service.exception.exceptions.UserClientException;
+import com.itmowork.company_service.mapper.CompanyMapper;
 import com.itmowork.company_service.model.Company;
 import com.itmowork.company_service.model.CompanyStatus;
 import com.itmowork.company_service.model.CompanyStatusName;
@@ -17,13 +21,21 @@ import com.itmowork.company_service.service.interfaces.CompanyStatusService;
 import com.itmowork.company_service.service.interfaces.UserCompanyService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuples;
+
+import java.util.List;
+import java.util.UUID;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +48,8 @@ public class CompanyServiceImpl implements CompanyService {
     private final UserClient userClient;
 
     private final UserCompanyService userCompanyService;
+
+    private final CompanyMapper companyMapper;
 
 
     @Override
@@ -83,6 +97,105 @@ public class CompanyServiceImpl implements CompanyService {
                 })
                 .map(userCompany -> mapToCompanyResponseDto(companyRequestDto, userCompany));
     }
+
+    @Override
+    @Transactional
+    public Mono<CompanyResponseDto> updateCompany(UUID id, UUID userId, CompanyUpdateRequestDto companyUpdateRequestDto) {
+        return Mono.fromCallable(() -> userClient.findUserById(userId))
+                .subscribeOn(Schedulers.boundedElastic())
+
+                .onErrorResume(FeignException.class, e ->
+                        Mono.error(new UserClientException(
+                                        "Пользователь " + userId + " не найден",
+                                        HttpStatus.NOT_FOUND)))
+
+                .flatMap(user -> userCompanyService.validateCompanyOwnership(id, userId))
+                .filter(Boolean::booleanValue)
+                .switchIfEmpty(
+                        Mono.error(new CompanyNotFoundException(
+                        "Компания с таким пользователем не найдена"
+                )))
+
+                .flatMap(valid -> companyRepository.findCompanyById(id))
+
+                .flatMap(company -> {
+//                    companyMapper.updateCompanyFromDto(company, companyUpdateRequestDto);
+                    if(companyUpdateRequestDto.name() != null){
+                        company.setName(companyUpdateRequestDto.name());
+                    }
+
+                    if(companyUpdateRequestDto.email() != null){
+                        company.setEmail(companyUpdateRequestDto.email());
+                    }
+
+                    if(companyUpdateRequestDto.description() != null){
+                        company.setDescription(companyUpdateRequestDto.description());
+                    }
+
+                    return companyRepository.save(company);
+                })
+                .map(companySaved -> {
+                    return CompanyResponseDto.builder()
+                            .id(companySaved.getId())
+                            .name(companySaved.getName())
+                            .email(companySaved.getEmail())
+                            .description(companySaved.getDescription())
+                            .statusMessage("Компания была успешно обновлена")
+                            .userId(userId)
+                            .build();
+                });
+    }
+
+    @Override
+    public Mono<CompanyDeleteResponseDto> deleteCompany(UUID id, UUID userId) {
+        return Mono.fromCallable(() -> userClient.findUserById(userId))
+                .subscribeOn(Schedulers.boundedElastic())
+
+                .onErrorResume(FeignException.class, e ->
+                        Mono.error(new UserClientException(
+                                "Пользователь " + userId + " не найден",
+                                HttpStatus.NOT_FOUND)))
+
+                .flatMap(user -> userCompanyService.validateCompanyOwnership(id, userId))
+                .filter(Boolean::booleanValue)
+                .switchIfEmpty(
+                        Mono.error(new CompanyNotFoundException(
+                                "Компания с таким пользователем не найдена"
+                        )))
+                .flatMap(valid -> companyRepository.findCompanyById(id))
+                .flatMap(companyRepository::delete)
+                .thenReturn(new CompanyDeleteResponseDto(
+                        id,
+                        "Компания была успешно удалена"
+                ));
+    }
+
+    @Override
+    public Mono<Page<CompanyResponseDto>> getAllCompanies(Pageable pageable) {
+        long limit = pageable.getPageSize();
+        long offset = pageable.getOffset();
+
+        Mono<Long> totalCount = companyRepository.count();
+        Flux<Company> companies = companyRepository.findAllCompaniesPaged(limit, offset);
+
+        return totalCount.zipWith(companies.collectList())
+                .map(tuple -> {
+                    long total = tuple.getT1();
+                    List<Company> companyList = tuple.getT2();
+
+                    List<CompanyResponseDto> dtoList = companyList.stream()
+                            .map(c ->
+                                 CompanyResponseDto.builder()
+                                        .id(c.getId())
+                                        .name(c.getName())
+                                        .email(c.getEmail())
+                                        .description(c.getDescription())
+                                        .build()
+                            ).toList();
+        return new PageImpl<>(dtoList, pageable, total);
+        });
+    }
+
 
     private Mono<UserResponseDto> createRemoteUser(UserRequestDto userRequestDto){
         return Mono.fromCallable(() -> userClient.createUser(userRequestDto))

@@ -1,6 +1,7 @@
 package com.itmowork.company_service.exception;
 
 import com.itmowork.company_service.exception.exceptions.CompanyAlreadyExistsException;
+import com.itmowork.company_service.exception.exceptions.CompanyNotFoundException;
 import com.itmowork.company_service.exception.exceptions.CompanyStatusNotFoundException;
 import com.itmowork.company_service.exception.exceptions.UserClientException;
 import org.springframework.http.HttpStatus;
@@ -41,5 +42,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserClientException.class)
     public Mono<ProblemDetail> handleUserClientException(UserClientException ex, ServerWebExchange exchange){
         return Mono.just(ProblemDetailsUtils.problemDetail(ex.getStatus(), "User remote client exception", ex.getMessage(), exchange));
+    }
+
+    @ExceptionHandler(CompanyNotFoundException.class)
+    public Mono<ProblemDetail> handleCompanyNotFoundException(CompanyNotFoundException ex, ServerWebExchange exchange){
+
+        return Mono.just(ProblemDetailsUtils.problemDetail(HttpStatus.NOT_FOUND, "Company not found", ex.getMessage(), exchange));
     }
 }
