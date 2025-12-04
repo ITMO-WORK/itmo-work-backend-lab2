@@ -40,53 +40,53 @@ public class VacancyController {
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-//
-//    @PostMapping("/{userId}/publish")
-//    public ResponseEntity<VacancyResponseDto> createPublishedVacancy(
-//            @PathVariable UUID userId,
-//            @RequestBody @Valid VacancyCreateRequestDto request) {
-//
-//        VacancyResponseDto response = vacancyService.createVacancy(
-//                userId,
-//                request,
-//                VacancyStatusName.PUBLISHED
-//        );
-//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//    }
-//
-//    @PatchMapping("/{userId}/{id}/update")
-//    public ResponseEntity<VacancyResponseDto> updateVacancy(
-//            @PathVariable UUID userId,
-//            @PathVariable Long id,
-//            @RequestBody @Valid VacancyUpdateRequestDto dto) {
-//
-//        return ResponseEntity.ok(
-//                vacancyService.updateVacancy(userId, id, dto)
-//        );
-//    }
-//
-//    @PatchMapping("/{userId}/{id}/change-status")
-//    public ResponseEntity<VacancyResponseDto> changeStatus(
-//            @PathVariable UUID userId,
-//            @PathVariable Long id,
-//            @RequestParam VacancyStatusName newStatus) {
-//
-//        return ResponseEntity.ok(
-//                vacancyService.changeStatus(userId, id, newStatus)
-//        );
-//    }
-//
-//    @PatchMapping("/{userId}/{id}/update-and-change-status")
-//    public ResponseEntity<VacancyResponseDto> updateAndChangeStatus(
-//            @PathVariable UUID userId,
-//            @PathVariable Long id,
-//            @RequestBody @Valid VacancyUpdateRequestDto dto,
-//            @RequestParam VacancyStatusName newStatus) {
-//
-//        return ResponseEntity.ok(
-//                vacancyService.updateAndChangeStatus(userId, id, dto, newStatus)
-//        );
-//    }
+
+    @PostMapping("/{userId}/publish")
+    public ResponseEntity<VacancyResponseDto> createPublishedVacancy(
+            @PathVariable UUID userId,
+            @RequestBody @Valid VacancyCreateRequestDto request) {
+
+        VacancyResponseDto response = vacancyService.createVacancy(
+                userId,
+                request,
+                VacancyStatusName.PUBLISHED
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PatchMapping("/{userId}/{id}/change-status")
+    public ResponseEntity<VacancyResponseDto> changeStatus(
+            @PathVariable UUID userId,
+            @PathVariable UUID id,
+            @RequestParam VacancyStatusName newStatus) {
+
+        return ResponseEntity.ok(
+                vacancyService.changeStatus(userId, id, newStatus)
+        );
+    }
+
+    @PatchMapping("/{userId}/{id}/update")
+    public ResponseEntity<VacancyResponseDto> updateVacancy(
+            @PathVariable UUID userId,
+            @PathVariable UUID id,
+            @RequestBody @Valid VacancyUpdateRequestDto dto) {
+
+        return ResponseEntity.ok(
+                vacancyService.updateVacancy(userId, id, dto)
+        );
+    }
+
+    @PatchMapping("/{userId}/{id}/update-and-change-status")
+    public ResponseEntity<VacancyResponseDto> updateAndChangeStatus(
+            @PathVariable UUID userId,
+            @PathVariable UUID id,
+            @RequestBody @Valid VacancyUpdateRequestDto dto,
+            @RequestParam VacancyStatusName newStatus) {
+
+        return ResponseEntity.ok(
+                vacancyService.updateAndChangeStatus(userId, id, dto, newStatus)
+        );
+    }
 
     @GetMapping
     public PagedModel<VacancyResponseDto> getAllPublishedVacancies(Pageable pageable) {

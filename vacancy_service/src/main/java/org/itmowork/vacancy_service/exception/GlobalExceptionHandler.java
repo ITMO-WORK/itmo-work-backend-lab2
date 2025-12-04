@@ -9,8 +9,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(InvalidVacancyStatusException.class)
+    public ResponseEntity<ProblemDetail> InvalidVacancyStatusException(InvalidVacancyStatusException e, HttpServletRequest request) {
+        ProblemDetail body = ProblemDetailsUtils.problemDetail(HttpStatus.BAD_REQUEST, "Update available only for DRAFT or PUBLISHED vacancies", "", request);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(InvalidVacancyStatusChangeException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidStatusChange(InvalidVacancyStatusChangeException ex) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
 
     @ExceptionHandler(CompanyNotFoundException.class)
     public ResponseEntity<ProblemDetail> CompanyNotFoundException(CompanyNotFoundException e, HttpServletRequest request) {

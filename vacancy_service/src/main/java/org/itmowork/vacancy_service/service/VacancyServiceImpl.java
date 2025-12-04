@@ -6,10 +6,9 @@ import org.itmowork.vacancy_service.dto.request.VacancyCreateRequestDto;
 import org.itmowork.vacancy_service.dto.request.VacancyUpdateRequestDto;
 import org.itmowork.vacancy_service.dto.response.CompanyResponseDto;
 import org.itmowork.vacancy_service.dto.response.VacancyResponseDto;
-import org.itmowork.vacancy_service.exception.exceptions.CompanyNotFoundException;
-import org.itmowork.vacancy_service.exception.exceptions.InvalidVacancySalaryException;
-import org.itmowork.vacancy_service.exception.exceptions.VacancyNotFoundException;
+import org.itmowork.vacancy_service.exception.exceptions.*;
 import org.itmowork.vacancy_service.infrastructure.feign.CompanyClient;
+import org.itmowork.vacancy_service.mappers.VacancyMapper;
 import org.itmowork.vacancy_service.model.Currency;
 import org.itmowork.vacancy_service.model.Vacancy;
 import org.itmowork.vacancy_service.model.VacancyStatus;
@@ -23,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -33,6 +34,13 @@ public class VacancyServiceImpl implements VacancyService {
     private final VacancyStatusService vacancyStatusService;
     private final CurrencyService currencyService;
     private final CompanyClient companyClient;
+
+    private final VacancyMapper vacancyMapper;
+
+    private static final Map<VacancyStatusName, Set<VacancyStatusName>> ALLOWED_STATUS_TRANSITIONS = Map.of(
+            VacancyStatusName.DRAFT, Set.of(VacancyStatusName.PUBLISHED, VacancyStatusName.CLOSED),
+            VacancyStatusName.PUBLISHED, Set.of(VacancyStatusName.DRAFT, VacancyStatusName.CLOSED)
+    );
 
     @Override
     public Page<VacancyResponseDto> getAllPublishedVacancies(Pageable pageable) {
@@ -50,21 +58,136 @@ public class VacancyServiceImpl implements VacancyService {
         ));
     }
 
-//    @Override
-//    public VacancyResponseDto updateAndChangeStatus(UUID userId, Long vacancyId, VacancyUpdateRequestDto dto, VacancyStatusName newStatus) {
-//        return null;
-//    }
-//
-//    @Override
-//    public VacancyResponseDto updateVacancy(UUID userId, Long vacancyId, VacancyUpdateRequestDto dto) {
-//        return null;
-//    }
-//
-//    @Override
-//    public VacancyResponseDto changeStatus(UUID userId, Long vacancyId, VacancyStatusName newStatus) {
-//        return null;
-//    }
-//
+    @Override
+    @Transactional
+    public VacancyResponseDto updateAndChangeStatus(
+            UUID userId,
+            UUID vacancyId,
+            VacancyUpdateRequestDto dto,
+            VacancyStatusName newStatus
+    ) {
+        Vacancy vacancy = getAndValidateVacancy(vacancyId);
+        UUID companyId = vacancyRepository.findCompanyId(vacancyId);
+
+        Boolean companyExists = companyClient.existsCompany(companyId);
+        if (companyExists == null || !companyExists) {
+            throw new CompanyNotFoundException("Company id not found: " + companyId);
+        }
+
+        Boolean owns = companyClient.validateCompanyOwnership(companyId, userId);
+        if (owns == null || !owns) {
+            throw new CompanyNotFoundException("User does not own this company");
+        }
+
+        VacancyStatusName currentStatus = vacancy.getStatus().getVacancyStatusName();
+
+        if (!(currentStatus == VacancyStatusName.DRAFT || currentStatus == VacancyStatusName.PUBLISHED)) {
+            throw new InvalidVacancyStatusException(
+                    "Update available only for DRAFT or PUBLISHED vacancies"
+            );
+        }
+
+        boolean allowedTransition =
+                (currentStatus == VacancyStatusName.DRAFT && newStatus == VacancyStatusName.PUBLISHED) ||
+                        (currentStatus == VacancyStatusName.PUBLISHED && newStatus == VacancyStatusName.DRAFT);
+
+        if (!allowedTransition) {
+            throw new InvalidVacancyStatusChangeException(
+                    "Impossible to change status from " + currentStatus + " to " + newStatus
+            );
+        }
+
+        vacancyMapper.update(vacancy, dto);
+
+        if (dto.currencyId() != null) {
+            Currency currency = currencyService.findCurrencyById(dto.currencyId());
+            vacancy.setCurrency(currency);
+        }
+
+        validateSalaryBounds(vacancy.getSalaryFrom(), vacancy.getSalaryTo());
+        VacancyStatus statusEntity = vacancyStatusService.findByVacancyStatusName(newStatus);
+        vacancy.setStatus(statusEntity);
+        Vacancy saved = vacancyRepository.save(vacancy);
+
+        return buildResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public VacancyResponseDto updateVacancy(UUID userId, UUID id, VacancyUpdateRequestDto dto) {
+
+        Vacancy vacancy = getAndValidateVacancy(id);
+        UUID companyId = vacancy.getCompanyId();
+
+        Boolean exists = companyClient.existsCompany(companyId);
+        if (exists == null || !exists) {
+            throw new CompanyNotFoundException("Company not found: " + companyId);
+        }
+
+        Boolean owns = companyClient.validateCompanyOwnership(companyId, userId);
+        if (!owns) {
+            throw new CompanyNotFoundException("User does not own this company");
+        }
+
+        VacancyStatusName status = vacancy.getStatus().getVacancyStatusName();
+        if (status != VacancyStatusName.DRAFT && status != VacancyStatusName.PUBLISHED) {
+            throw new InvalidVacancyStatusException(
+                    "Update allowed only for DRAFT or PUBLISHED vacancies"
+            );
+        }
+
+        vacancyMapper.update(vacancy, dto);
+
+        if (dto.currencyId() != null) {
+            Currency currency = currencyService.findCurrencyById(dto.currencyId());
+            if (currency == null) {
+                throw new CurrencyNotFoundException("Currency with id=" + dto.currencyId() + " not found");
+            }
+            vacancy.setCurrency(currency);
+        }
+
+        validateSalaryBounds(vacancy.getSalaryFrom(), vacancy.getSalaryTo());
+        Vacancy saved = vacancyRepository.save(vacancy);
+        return buildResponse(saved);
+    }
+
+
+    @Override
+    @Transactional
+    public VacancyResponseDto changeStatus(UUID userId, UUID vacancyId, VacancyStatusName newStatus) {
+
+        Vacancy vacancy = getAndValidateVacancy(vacancyId);
+        UUID companyId = vacancy.getCompanyId();
+
+        Boolean exists = companyClient.existsCompany(companyId);
+        if (exists == null || !exists) {
+            throw new CompanyNotFoundException("Company id not found: " + companyId);
+        }
+
+        Boolean owns = companyClient.validateCompanyOwnership(companyId, userId);
+        if (owns == null || !owns) {
+            throw new CompanyNotFoundException("User does not own this company");
+        }
+
+        VacancyStatusName currentStatus = vacancy.getStatus().getVacancyStatusName();
+
+        Set<VacancyStatusName> allowedNextStatuses =
+                ALLOWED_STATUS_TRANSITIONS.getOrDefault(currentStatus, Set.of());
+
+        if (!allowedNextStatuses.contains(newStatus)) {
+            throw new InvalidVacancyStatusChangeException(
+                    "Impossible to change status from " + currentStatus + " to " + newStatus
+            );
+        }
+
+        VacancyStatus statusEntity = vacancyStatusService.findByVacancyStatusName(newStatus);
+        vacancy.setStatus(statusEntity);
+        validateSalaryBounds(vacancy.getSalaryFrom(), vacancy.getSalaryTo());
+        Vacancy saved = vacancyRepository.save(vacancy);
+
+        return buildResponse(saved);
+    }
+
     @Override
     @Transactional
     public VacancyResponseDto createVacancy(UUID userId, VacancyCreateRequestDto request, VacancyStatusName statusName) {

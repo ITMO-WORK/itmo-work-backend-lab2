@@ -13,25 +13,25 @@ import java.util.UUID;
 
 public interface VacancyService {
 
-//    VacancyResponseDto updateAndChangeStatus(
-//            UUID userId,
-//            Long vacancyId,
-//            VacancyUpdateRequestDto dto,
-//            VacancyStatusName newStatus
-//    );
-//
-//    VacancyResponseDto updateVacancy(
-//            UUID userId,
-//            Long vacancyId,
-//            VacancyUpdateRequestDto dto
-//    );
-//
-//    VacancyResponseDto changeStatus(
-//            UUID userId,
-//            Long vacancyId,
-//            VacancyStatusName newStatus
-//    );
-//
+    VacancyResponseDto updateAndChangeStatus(
+            UUID userId,
+            UUID vacancyId,
+            VacancyUpdateRequestDto dto,
+            VacancyStatusName newStatus
+    );
+
+    VacancyResponseDto updateVacancy(
+            UUID userId,
+            UUID vacancyId,
+            VacancyUpdateRequestDto dto
+    );
+
+    VacancyResponseDto changeStatus(
+            UUID userId,
+            UUID vacancyId,
+            VacancyStatusName newStatus
+    );
+
     VacancyResponseDto createVacancy(
             UUID userId,
             VacancyCreateRequestDto request,
