@@ -21,7 +21,7 @@ insert into vacancy_status (status) values
 on conflict (status) do nothing;
 
 create table if not exists vacancies(
-    id bigserial primary key,
+    id uuid primary key default gen_random_uuid(),
     company_id uuid not null,
     title varchar(255) not null,
     description text,

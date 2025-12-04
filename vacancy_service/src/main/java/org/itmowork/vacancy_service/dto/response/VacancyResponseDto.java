@@ -5,12 +5,12 @@ import java.util.UUID;
 
 @Builder
 public record VacancyResponseDto(
-        Long id,
+        UUID id,
         String title,
         String description,
         Integer salaryFrom,
         Integer salaryTo,
         Long statusId,
-        UUID companyId,     // ← ЗАМЕНЕНО
+        UUID companyId,
         Long currencyId
 ) {}

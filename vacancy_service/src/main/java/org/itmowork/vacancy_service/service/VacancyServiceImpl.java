@@ -64,24 +64,24 @@ public class VacancyServiceImpl implements VacancyService {
 //    }
 
     @Override
-    public Vacancy getReferenceById(Long vacancyId) {
+    public Vacancy getReferenceById(UUID vacancyId) {
         return vacancyRepository.getReferenceById(vacancyId);
     }
 
     @Override
-    public boolean existsVacancyById(Long id) {
+    public boolean existsVacancyById(UUID id) {
         return vacancyRepository.existsVacanciesById(id);
     }
 
     @Override
-    public VacancyStatus findCurrentVacancyStatusByVacancyId(Long id) {
+    public VacancyStatus findCurrentVacancyStatusByVacancyId(UUID id) {
         Long vacancyStatusId = vacancyRepository.findVacancyStatusById(id);
         return vacancyStatusService.findVacancyStatusById(vacancyStatusId);
     }
 
     @Override
-    public UUID findCompanyByVacancyId(Long vacancyId) {
-        return vacancyRepository.findCompanyIdById(vacancyId); // ← ИСПРАВЛЕНО Long → UUID
+    public UUID findCompanyByVacancyId(UUID vacancyId) {
+        return vacancyRepository.findCompanyIdById(vacancyId);
     }
 
     private void validateSalaryBounds(Integer salaryFrom, Integer salaryTo) {
@@ -98,7 +98,7 @@ public class VacancyServiceImpl implements VacancyService {
         }
     }
 
-    private Vacancy getAndValidateVacancy(Long vacancyId) {
+    private Vacancy getAndValidateVacancy(UUID vacancyId) {
         return vacancyRepository.findById(vacancyId)
                 .orElseThrow(() ->
                         new VacancyNotFoundException("Vacancy with id=" + vacancyId + " not found"));
@@ -115,5 +115,23 @@ public class VacancyServiceImpl implements VacancyService {
                 .companyId(saved.getCompanyId())
                 .currencyId(saved.getCurrency().getId())
                 .build();
+    }
+
+    @Override
+    public String getVacancyTitle(UUID vacancyId) {
+        String title = vacancyRepository.findTitleById(vacancyId);
+        if (title == null) {
+            throw new VacancyNotFoundException("Vacancy with id=" + vacancyId + " not found");
+        }
+        return title;
+    }
+
+    @Override
+    public boolean isVacancyPublished(UUID vacancyId) {
+        Boolean published = vacancyRepository.isPublished(vacancyId);
+        if (published == null) {
+            throw new VacancyNotFoundException("Vacancy with id=" + vacancyId + " not found");
+        }
+        return published;
     }
 }

@@ -38,10 +38,12 @@ public interface VacancyService {
 //            VacancyStatusName statusName
 //    );
 
-    Vacancy getReferenceById(Long vacancyId);
-    boolean existsVacancyById(Long id);
-    VacancyStatus findCurrentVacancyStatusByVacancyId(Long id);
-    UUID findCompanyByVacancyId(Long vacancyId);
+    Vacancy getReferenceById(UUID vacancyId);
+    boolean existsVacancyById(UUID id);
+    VacancyStatus findCurrentVacancyStatusByVacancyId(UUID id);
+    UUID findCompanyByVacancyId(UUID vacancyId);
     Page<VacancyResponseDto> getAllPublishedVacancies(Pageable pageable);
+    String getVacancyTitle(UUID vacancyId);
+    boolean isVacancyPublished(UUID vacancyId);
 }
 

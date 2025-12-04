@@ -88,5 +88,20 @@ public class VacancyController {
                 vacancyService.getAllPublishedVacancies(pageable)
         );
     }
+
+    @GetMapping("/{id}/title")
+    public ResponseEntity<String> getVacancyTitle(@PathVariable UUID id) {
+        return ResponseEntity.ok(vacancyService.getVacancyTitle(id));
+    }
+
+    @GetMapping("/{id}/is-published")
+    public ResponseEntity<Boolean> isVacancyPublished(@PathVariable UUID id) {
+        return ResponseEntity.ok(vacancyService.isVacancyPublished(id));
+    }
+
+    @GetMapping("/{id}/exists")
+    public ResponseEntity<Boolean> exists(@PathVariable UUID id) {
+        return ResponseEntity.ok(vacancyService.existsVacancyById(id));
+    }
 }
 
