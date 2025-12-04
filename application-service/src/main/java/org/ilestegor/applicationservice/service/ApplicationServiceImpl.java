@@ -74,23 +74,16 @@ public class ApplicationServiceImpl implements ApplicationService {
         // TODO check vacancy exists
         // TODO if vacancy exists then i need to get vacancy title
         // TODO check user belongs to company
-        // TODO get user fullname to construct DTO for response
         return checkUserExists(userId)
                 .thenMany(applicationRepository.findAllByVacancyId(vacancyId, pageable)).
                 flatMap(application -> checkUserExists(application.getUserId())
                         .map(user -> {
                     ApplicationDto applicationDto = applicationMapper.fromApplicationtoApplicationDto(application);
-                            System.out.println(user.fullName());
                     return applicationDto.toBuilder().userFullName(user.fullName()).build();
                 }))
                 .collectList()
                 .zipWith(applicationRepository.count())
                 .map(res -> new PageImpl<>(res.getT1(), pageable, res.getT2()));
-
-//                .map(applicationMapper::fromApplicationtoApplicationDto)
-//                // collects all the elements from flux then turns them into List<> then emits Mono<List<>>
-//                .collectList().zipWith(applicationRepository.count())
-//                .map(res -> new PageImpl<>(res.getT1(), pageable, res.getT2()));
     }
 
     private Mono<ApplicationCreateResponseDto> updateAndSaveApplication(UUID vacancyId, UUID userId, ApplicationCreateRequestDto applicationCreateRequestDto){
