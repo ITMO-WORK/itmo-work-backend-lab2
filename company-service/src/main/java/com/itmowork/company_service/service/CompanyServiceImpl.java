@@ -10,7 +10,6 @@ import com.itmowork.company_service.dto.response.UserResponseDto;
 import com.itmowork.company_service.exception.exceptions.CompanyAlreadyExistsException;
 import com.itmowork.company_service.exception.exceptions.CompanyNotFoundException;
 import com.itmowork.company_service.exception.exceptions.UserClientException;
-import com.itmowork.company_service.mapper.CompanyMapper;
 import com.itmowork.company_service.model.Company;
 import com.itmowork.company_service.model.CompanyStatus;
 import com.itmowork.company_service.model.CompanyStatusName;
@@ -20,6 +19,8 @@ import com.itmowork.company_service.service.interfaces.CompanyService;
 import com.itmowork.company_service.service.interfaces.CompanyStatusService;
 import com.itmowork.company_service.service.interfaces.UserCompanyService;
 import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,11 +32,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuples;
+import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
+
 
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +51,8 @@ public class CompanyServiceImpl implements CompanyService {
 
     private final UserCompanyService userCompanyService;
 
-    private final CompanyMapper companyMapper;
+    private final CircuitBreakerRegistry registry;
+
 
 
     @Override
@@ -101,13 +104,13 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     @Transactional
     public Mono<CompanyResponseDto> updateCompany(UUID id, UUID userId, CompanyUpdateRequestDto companyUpdateRequestDto) {
-        return Mono.fromCallable(() -> userClient.findUserById(userId))
-                .subscribeOn(Schedulers.boundedElastic())
+        return findUserById(userId)
 
-                .onErrorResume(FeignException.class, e ->
+                .onErrorResume(FeignException.NotFound.class, e ->
                         Mono.error(new UserClientException(
                                         "Пользователь " + userId + " не найден",
                                         HttpStatus.NOT_FOUND)))
+                .onErrorResume(FeignException.class, Mono::error)
 
                 .flatMap(user -> userCompanyService.validateCompanyOwnership(id, userId))
                 .filter(Boolean::booleanValue)
@@ -119,7 +122,6 @@ public class CompanyServiceImpl implements CompanyService {
                 .flatMap(valid -> companyRepository.findCompanyById(id))
 
                 .flatMap(company -> {
-//                    companyMapper.updateCompanyFromDto(company, companyUpdateRequestDto);
                     if(companyUpdateRequestDto.name() != null){
                         company.setName(companyUpdateRequestDto.name());
                     }
@@ -148,10 +150,8 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Mono<CompanyDeleteResponseDto> deleteCompany(UUID id, UUID userId) {
-        return Mono.fromCallable(() -> userClient.findUserById(userId))
-                .subscribeOn(Schedulers.boundedElastic())
-
-                .onErrorResume(FeignException.class, e ->
+        return findUserById(userId)
+                .onErrorResume(FeignException.NotFound.class, e ->
                         Mono.error(new UserClientException(
                                 "Пользователь " + userId + " не найден",
                                 HttpStatus.NOT_FOUND)))
@@ -196,17 +196,28 @@ public class CompanyServiceImpl implements CompanyService {
         });
     }
 
+    @Override
+    public Mono<Boolean> existsCompanyById(UUID id) {
+        return companyRepository.existsById(id);
+    }
 
-    private Mono<UserResponseDto> createRemoteUser(UserRequestDto userRequestDto){
+
+    public Mono<UserResponseDto> createRemoteUser(UserRequestDto userRequestDto){
+        CircuitBreaker cb = registry.circuitBreaker("userClientCB");
+
         return Mono.fromCallable(() -> userClient.createUser(userRequestDto))
                 .subscribeOn(Schedulers.boundedElastic())
-                .onErrorResume(FeignException.class, e ->
-                        {
-                            HttpStatus status = HttpStatus.resolve(e.status());
-                            if (status == null) status = HttpStatus.INTERNAL_SERVER_ERROR;
+                .transformDeferred(CircuitBreakerOperator.of(cb))
+                .onErrorResume(e -> createUserFallback(userRequestDto, e));
+    }
 
-                            return Mono.error(new UserClientException(e.getMessage(), status));
-                        });
+    public Mono<UserResponseDto> findUserById(UUID userId) {
+        CircuitBreaker cb = registry.circuitBreaker("userClientCB");
+
+        return Mono.fromCallable(() -> userClient.findUserById(userId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .transformDeferred(CircuitBreakerOperator.of(cb))
+                .onErrorResume(this::findUserByIdFallback);
     }
 
     private Company getCompany(CompanyRequestDto companyRequestDto, CompanyStatus companyStatus){
@@ -228,4 +239,20 @@ public class CompanyServiceImpl implements CompanyService {
                 userCompany.getUserId()
         );
     }
+
+    public Mono<UserResponseDto> createUserFallback(UserRequestDto dto, Throwable e) {
+        return Mono.error(new UserClientException(
+                "User service сейчас не доступен, создание юзера невозможно",
+                HttpStatus.SERVICE_UNAVAILABLE
+        ));
+    }
+
+    private Mono<UserResponseDto> findUserByIdFallback(Throwable e) {
+        return Mono.error(new UserClientException(
+                "User service сейчас не доступен, получение юзера невозможно",
+                HttpStatus.SERVICE_UNAVAILABLE
+        ));
+    }
+
+
 }

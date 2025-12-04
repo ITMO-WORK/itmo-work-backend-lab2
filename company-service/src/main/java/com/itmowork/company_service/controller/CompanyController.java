@@ -59,4 +59,9 @@ public class CompanyController {
     public Mono<Boolean> validateCompanyOwnership(@PathVariable UUID companyId, @PathVariable UUID userId){
         return userCompanyService.validateCompanyOwnership(companyId, userId);
     }
+
+    @GetMapping("/{id}")
+    public Mono<Boolean> existsCompanyById(@PathVariable UUID id){
+        return companyService.existsCompanyById(id);
+    }
 }

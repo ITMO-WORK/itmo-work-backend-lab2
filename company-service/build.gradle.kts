@@ -36,6 +36,13 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.13")
 	implementation("org.mapstruct:mapstruct:1.6.2")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
+	implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+	implementation("org.springframework.boot:spring-boot-starter-aop:4.0.0-M2")
+	// https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-circuitbreaker
+	implementation("io.github.resilience4j:resilience4j-circuitbreaker:2.3.0")
+	// https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-reactor
+	implementation("io.github.resilience4j:resilience4j-reactor:2.3.0")
 	implementation("org.liquibase:liquibase-core:5.0.1")
 	implementation("org.apache.commons:commons-lang3:3.18.0")
 	implementation("org.postgresql:r2dbc-postgresql")
