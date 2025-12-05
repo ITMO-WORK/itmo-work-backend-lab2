@@ -35,6 +35,12 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+	testImplementation("org.testcontainers:db2")
+	testImplementation("org.testcontainers:postgresql")
+	testImplementation("org.springframework.cloud:spring-cloud-starter-contract-stub-runner")
+
 }
 
 dependencyManagement {

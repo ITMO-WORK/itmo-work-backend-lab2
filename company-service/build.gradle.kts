@@ -37,11 +37,8 @@ dependencies {
 	implementation("org.mapstruct:mapstruct:1.6.2")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
 	implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
-	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
 	implementation("org.springframework.boot:spring-boot-starter-aop:4.0.0-M2")
-	// https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-circuitbreaker
 	implementation("io.github.resilience4j:resilience4j-circuitbreaker:2.3.0")
-	// https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-reactor
 	implementation("io.github.resilience4j:resilience4j-reactor:2.3.0")
 	implementation("org.liquibase:liquibase-core:5.0.1")
 	implementation("org.apache.commons:commons-lang3:3.18.0")
@@ -50,6 +47,14 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+	testImplementation("org.testcontainers:db2")
+	testImplementation("org.testcontainers:postgresql")
+	testImplementation("org.springframework.cloud:spring-cloud-starter-contract-stub-runner")
+
+
 	testImplementation("io.projectreactor:reactor-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
