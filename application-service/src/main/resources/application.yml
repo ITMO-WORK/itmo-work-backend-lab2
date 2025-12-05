@@ -5,8 +5,6 @@ spring:
     name: application-service
   profiles:
     active: ${PROFILE:dev}
-  jackson:
-    property-naming-strategy: SNAKE_CASE
   config:
     activate:
       on-profile: dev
