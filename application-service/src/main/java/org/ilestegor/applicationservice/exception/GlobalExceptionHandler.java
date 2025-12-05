@@ -1,7 +1,6 @@
 package org.ilestegor.applicationservice.exception;
 
 import org.ilestegor.applicationservice.exception.exceptions.*;
-import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -9,14 +8,13 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
-import org.springframework.web.server.ServerWebInputException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ProblemDetail> userNotFoundExceptionHandler(UserNotFoundException ex, ServerHttpRequest request){
-        ProblemDetail body = ProblemDetailsUtils.problemDetail(HttpStatus.BAD_REQUEST, "User not found", "", request);
+        ProblemDetail body = ProblemDetailsUtils.problemDetail(HttpStatus.NOT_FOUND, "User not found", "", request);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
@@ -44,4 +42,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(UserDoesNotBelongsToCompanyException.class)
+    public ResponseEntity<ProblemDetail> userDoesNotBelongToCompanyExceptionHandler(UserDoesNotBelongsToCompanyException ex, ServerHttpRequest request){
+        ProblemDetail body = ProblemDetailsUtils.problemDetail(HttpStatus.NOT_FOUND, "User does not belong to any company", "", request);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(VacancyNotFoundException.class)
+    public ResponseEntity<ProblemDetail> vacancyNotFoundExceptionHandler(VacancyNotFoundException ex, ServerHttpRequest request){
+        ProblemDetail body = ProblemDetailsUtils.problemDetail(HttpStatus.NOT_FOUND, "Vacancy not found", "", request);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(VacancyNotPublishedException.class)
+    public ResponseEntity<ProblemDetail> vacancyNotPublishedExceptionHandler(VacancyNotPublishedException ex, ServerHttpRequest request){
+        ProblemDetail body = ProblemDetailsUtils.problemDetail(HttpStatus.BAD_REQUEST, "Vacancy is not published", "", request);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
 }

@@ -30,7 +30,7 @@ public class ApplicationController {
 
     @PostMapping
     public Mono<ResponseEntity<ApplicationCreateResponseDto>> createApplication(@RequestParam UUID vacancyId, @RequestParam UUID userId, @Valid @RequestBody ApplicationCreateRequestDto applicationCreateRequestDto){
-        return applicationService.createApplication(vacancyId, userId, applicationCreateRequestDto).map(body -> new ResponseEntity<>(body, HttpStatus.OK));
+        return applicationService.createApplication(vacancyId, userId, applicationCreateRequestDto).map(body -> new ResponseEntity<>(body, HttpStatus.CREATED));
     }
 
     @PatchMapping("/{vacancyId}")

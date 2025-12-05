@@ -5,6 +5,8 @@ import java.util.UUID;
 public record ApplicationCreateResponseDto(
         UUID id,
         String status,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        String coverLetter
 ) {
 }

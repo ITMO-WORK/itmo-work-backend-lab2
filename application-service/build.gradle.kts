@@ -21,12 +21,18 @@ repositories {
 extra["springCloudVersion"] = "2025.0.0"
 
 dependencies {
+    testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-starter-config")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.liquibase:liquibase-core")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.projectlombok:lombok")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:db2")
+    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.springframework.cloud:spring-cloud-starter-contract-stub-runner")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-validation")
