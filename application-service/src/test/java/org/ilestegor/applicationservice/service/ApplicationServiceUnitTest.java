@@ -144,8 +144,6 @@ class ApplicationServiceUnitTest {
             when(userClient.isUserExistsById(userId)).thenReturn(mock);
 
 
-
-
             when(applicationRepository.existsByUserIdAndVacancyId(userId, vacancyId))
                     .thenReturn(Mono.just(false));
 
@@ -430,8 +428,6 @@ class ApplicationServiceUnitTest {
                             "t@mail.com"
                     ));
 
-            
-
 
             when(applicationRepository.existsByUserIdAndVacancyId(userId, vacancyId))
                     .thenReturn(Mono.just(true));
@@ -439,10 +435,6 @@ class ApplicationServiceUnitTest {
             when(applicationRepository.findApplicationsByUserIdAndVacancyId(userId, vacancyId))
                     .thenReturn(Mono.just(Application.builder().build()));
 
-
-
-
-            
             Mono<ApplicationCreateResponseDto> result =
                     applicationService.updateApplication(vacancyId, userId, request);
 
@@ -479,12 +471,6 @@ class ApplicationServiceUnitTest {
 
             when(applicationRepository.findApplicationsByUserIdAndVacancyId(userId, vacancyId))
                     .thenReturn(Mono.just(Application.builder().build()));
-
-
-
-
-
-
 
             
             Mono<ApplicationCreateResponseDto> result =
@@ -525,13 +511,6 @@ class ApplicationServiceUnitTest {
             when(applicationRepository.findApplicationsByUserIdAndVacancyId(userId, vacancyId))
                     .thenReturn(Mono.just(Application.builder().build()));
 
-
-
-
-
-
-
-            
             Mono<ApplicationCreateResponseDto> result =
                     applicationService.updateApplication(vacancyId, userId, request);
 
@@ -571,12 +550,6 @@ class ApplicationServiceUnitTest {
             when(applicationRepository.findApplicationsByUserIdAndVacancyId(userId, vacancyId))
                     .thenReturn(Mono.empty());
 
-
-
-
-
-
-
             
             Mono<ApplicationCreateResponseDto> result =
                     applicationService.updateApplication(vacancyId, userId, request);
@@ -614,13 +587,6 @@ class ApplicationServiceUnitTest {
             
             when(applicationRepository.findApplicationsByUserIdAndVacancyId(userId, vacancyId))
                     .thenReturn(Mono.empty());
-
-            
-
-
-
-
-
 
             
             Mono<ApplicationCreateResponseDto> result =
@@ -861,25 +827,6 @@ class ApplicationServiceUnitTest {
             when(applicationRepository.findVacancyIdById(applicationId))
                     .thenReturn(Mono.just(vacancyId));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             
             Mono<ApplicationStatusUpdateResponseDto> result =
                     applicationService.updateApplicationStatus(applicationId, userId, request);
@@ -907,26 +854,6 @@ class ApplicationServiceUnitTest {
             
             when(applicationRepository.findVacancyIdById(applicationId))
                     .thenReturn(Mono.empty());
-
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
             
             Mono<ApplicationStatusUpdateResponseDto> result =
@@ -959,21 +886,9 @@ class ApplicationServiceUnitTest {
             when(vacancyClient.isVacancyExists(vacancyId))
                     .thenReturn(false);
 
-            
-
-
-
-
-
 
             when(applicationRepository.findById(applicationId))
                     .thenReturn(Mono.just(Application.builder().build()));
-
-
-
-
-
-
 
 
             
@@ -1019,12 +934,6 @@ class ApplicationServiceUnitTest {
                     .thenReturn(Mono.just(Application.builder().build()));
 
 
-
-
-
-
-
-
             
             Mono<ApplicationStatusUpdateResponseDto> result =
                     applicationService.updateApplicationStatus(applicationId, userId, request);
@@ -1064,14 +973,6 @@ class ApplicationServiceUnitTest {
             
             when(applicationRepository.findById(applicationId))
                     .thenReturn(Mono.empty());
-
-
-
-
-
-
-
-
 
             
             Mono<ApplicationStatusUpdateResponseDto> result =
@@ -1127,9 +1028,6 @@ class ApplicationServiceUnitTest {
             when(applicationStatusService
                     .findApplicationStatusByApplicationStatusName(request.applicationStatusName()))
                     .thenReturn(Mono.empty());
-
-
-
 
             
             Mono<ApplicationStatusUpdateResponseDto> result =
