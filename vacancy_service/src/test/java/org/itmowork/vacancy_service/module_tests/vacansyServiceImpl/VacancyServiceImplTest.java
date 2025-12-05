@@ -1,4 +1,4 @@
-package org.itmowork.vacancy_service.vacansyServiceImpl;
+package org.itmowork.vacancy_service.module_tests.vacansyServiceImpl;
 
 import org.itmowork.vacancy_service.dto.response.VacancyResponseDto;
 import org.itmowork.vacancy_service.exception.exceptions.InvalidVacancySalaryException;

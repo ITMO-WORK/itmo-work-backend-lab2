@@ -25,6 +25,7 @@ dependencies {
     implementation("org.projectlombok:lombok")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-starter-config")
+    testImplementation("org.springframework.cloud:spring-cloud-starter-contract-stub-runner")
     annotationProcessor("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
     implementation("org.liquibase:liquibase-core:4.32.0")

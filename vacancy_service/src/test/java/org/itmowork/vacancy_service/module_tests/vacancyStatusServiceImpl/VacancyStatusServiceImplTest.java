@@ -1,4 +1,4 @@
-package org.itmowork.vacancy_service.vacancyStatusServiceImpl;
+package org.itmowork.vacancy_service.module_tests.vacancyStatusServiceImpl;
 
 import org.itmowork.vacancy_service.exception.exceptions.VacancyStatusNotFoundException;
 import org.itmowork.vacancy_service.model.VacancyStatus;

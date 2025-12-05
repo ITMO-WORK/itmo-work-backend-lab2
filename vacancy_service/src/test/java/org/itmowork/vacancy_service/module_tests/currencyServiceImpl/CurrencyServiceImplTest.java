@@ -1,4 +1,4 @@
-package org.itmowork.vacancy_service.currencyServiceImpl;
+package org.itmowork.vacancy_service.module_tests.currencyServiceImpl;
 
 import org.itmowork.vacancy_service.exception.exceptions.CurrencyNotFoundException;
 import org.itmowork.vacancy_service.model.Currency;
