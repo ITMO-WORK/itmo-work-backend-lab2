@@ -106,7 +106,7 @@ class VacancyServiceUpdateAndChangeStatusTest {
                 () -> vacancyService.updateAndChangeStatus(
                         userId, vacancyId,
                         new VacancyUpdateRequestDto(null, null, null, null, null),
-                        VacancyStatusName.CLOSED // запрещено при update
+                        VacancyStatusName.CLOSED
                 )
         );
     }
