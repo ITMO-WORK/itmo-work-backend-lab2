@@ -1,12 +1,23 @@
 #!/bin/bash
+set -e
+
+SERVICES=(
+  eureka-server
+  config-server
+  application-service
+  company-service
+  user-service
+  vacancy_service
+  itmo-work-gateway
+)
 
 echo "=== Building all JAR files ==="
-for service in eureka-server config-server application-service company-service user-service vacancy_service itmo-work-gateway; do
+for service in "${SERVICES[@]}"; do
     echo "Building $service..."
     if [ -d "$service" ]; then
         cd "$service"
         if [ -f "gradlew" ]; then
-            ./gradlew clean bootJar --no-daemon -x test
+            ./gradlew clean bootJar -x test
         elif [ -f "mvnw" ]; then
             ./mvnw clean package -DskipTests
         fi

@@ -14,3 +14,4 @@ spring:
           password: ${PASSWORD}
           default-label: main
           search-paths: "{application}"
+          clone-on-start: true

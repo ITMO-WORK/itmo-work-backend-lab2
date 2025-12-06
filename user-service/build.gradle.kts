@@ -40,6 +40,7 @@ dependencies {
 	testImplementation("org.testcontainers:db2")
 	testImplementation("org.testcontainers:postgresql")
 	testImplementation("org.springframework.cloud:spring-cloud-starter-contract-stub-runner")
+    implementation("org.springframework.retry:spring-retry:2.0.12")
 
 }
 

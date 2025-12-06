@@ -57,6 +57,7 @@ dependencies {
 
 	testImplementation("io.projectreactor:reactor-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation("org.springframework.retry:spring-retry:2.0.12")
 }
 
 dependencyManagement {

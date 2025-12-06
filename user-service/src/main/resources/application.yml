@@ -6,6 +6,6 @@ spring:
   config:
     activate:
       on-profile: ${PROFILE:dev}
-    import: optional:configserver:http://localhost:${CONFIG_SERVER_PORT:9991}
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:9991}
 server:
   port: 8081
