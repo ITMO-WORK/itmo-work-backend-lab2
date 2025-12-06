@@ -9,5 +9,5 @@ spring:
     property-naming-strategy: SNAKE_CASE
   config:
     activate:
-      on-profile: dev
+      on-profile: ${PROFILE:dev}
     import: configserver:http://localhost:9991

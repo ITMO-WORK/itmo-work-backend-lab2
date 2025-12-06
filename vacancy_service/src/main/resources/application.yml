@@ -14,5 +14,5 @@ spring:
 spring:
   config:
     activate:
-      on-profile: dev
+      on-profile: ${PROFILE:dev}
 
