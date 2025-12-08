@@ -22,11 +22,11 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       CONFIG_REPO_URI: https://github.com/ITMO-WORK/itmo-work-configs-repo-lab2
-      USERNAME: kkettch
-      PASSWORD: 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
+      USERNAME:
+      PASSWORD:
       SPRING_CLOUD_CONFIG_SERVER_GIT_URI: https://github.com/ITMO-WORK/itmo-work-configs-repo-lab2
-      SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME: kkettch
-      SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: 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
+      SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME:
+      SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD:
     networks:
       - itmo
     healthcheck:
