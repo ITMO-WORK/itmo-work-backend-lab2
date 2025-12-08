@@ -33,8 +33,8 @@ public abstract class BaseE2ETest {
     @BeforeAll
     static void waitForClusterReady() throws Exception {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        waitUntilVacancyServiceReady();
         waitUntilUserServiceReady();
+        waitUntilVacancyServiceReady();
         Thread.sleep(30000);
     }
 
@@ -80,7 +80,6 @@ public abstract class BaseE2ETest {
         }
         throw new IllegalStateException("User service did not become ready in time");
     }
-
 
     @BeforeEach
     void setupBaseUrl() {

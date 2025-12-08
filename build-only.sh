@@ -8,6 +8,7 @@ SERVICES=(
   user-service
   vacancy_service
   itmo-work-gateway
+  application-service
 )
 
 echo "=== Building all JAR files ==="

@@ -22,11 +22,11 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       CONFIG_REPO_URI: https://github.com/ITMO-WORK/itmo-work-configs-repo-lab2
-      USERNAME:
-      PASSWORD:
+      USERNAME: ${USERNAME_ENV}
+      PASSWORD: ${PASSWORD_ENV}
       SPRING_CLOUD_CONFIG_SERVER_GIT_URI: https://github.com/ITMO-WORK/itmo-work-configs-repo-lab2
-      SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME:
-      SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD:
+      SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME: ${USERNAME_ENV}
+      SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: ${PASSWORD_ENV}
     networks:
       - itmo
     healthcheck:
@@ -79,6 +79,20 @@ services:
         condition: service_healthy
     environment:
       PROFILE: prod
+      CONFIG_SERVER_URL: http://config-server:9991
+    networks:
+      - itmo
+  application-service:
+    image: itmo-work/application-service:e2e
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
       CONFIG_SERVER_URL: http://config-server:9991
     networks:
       - itmo
