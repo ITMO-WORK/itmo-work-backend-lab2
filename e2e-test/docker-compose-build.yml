@@ -1,0 +1,24 @@
+services:
+  config-server:
+    build: ../config-server
+    image: itmo-work/config-server:e2e
+
+  eureka-server:
+    build: ../eureka-server
+    image: itmo-work/eureka-server:e2e
+
+  company-service:
+    build: ../company-service
+    image: itmo-work/company-service:e2e
+
+  user-service:
+    build: ../user-service
+    image: itmo-work/user-service:e2e
+
+  vacancy-service:
+    build: ../vacancy_service
+    image: itmo-work/vacancy-service:e2e
+
+  itmo-work-gateway:
+    build: ../itmo-work-gateway
+    image: itmo-work/gateway:e2e

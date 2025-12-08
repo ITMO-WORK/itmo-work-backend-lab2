@@ -1,0 +1,127 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: itm-main
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../init-db:/docker-entrypoint-initdb.d
+    networks:
+      - itmo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  config-server:
+    image: itmo-work/config-server:e2e
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      CONFIG_REPO_URI: https://github.com/ITMO-WORK/itmo-work-configs-repo-lab2
+      USERNAME: kkettch
+      PASSWORD: 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
+      SPRING_CLOUD_CONFIG_SERVER_GIT_URI: https://github.com/ITMO-WORK/itmo-work-configs-repo-lab2
+      SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME: kkettch
+      SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: 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
+    networks:
+      - itmo
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://config-server:9991/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+  eureka-server:
+    image: itmo-work/eureka-server:e2e
+    depends_on:
+      config-server:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:9991
+    networks:
+      - itmo
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://eureka-server:8761/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  company-service:
+    image: itmo-work/company-service:e2e
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      CONFIG_SERVER_URL: http://config-server:9991
+    networks:
+      - itmo
+
+  user-service:
+    image: itmo-work/user-service:e2e
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      PROFILE: prod
+      CONFIG_SERVER_URL: http://config-server:9991
+    networks:
+      - itmo
+
+  vacancy-service:
+    image: itmo-work/vacancy-service:e2e
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      CONFIG_SERVER_URL: http://config-server:9991
+    networks:
+      - itmo
+
+  itmo-work-gateway:
+    image: itmo-work/gateway:e2e
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+    ports:
+      - "8765:8765"   # важно для Testcontainers
+    networks:
+      - itmo
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://itmo-work-gateway:8765/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+networks:
+  itmo:
+    driver: bridge
+
+volumes:
+  postgres_data:
