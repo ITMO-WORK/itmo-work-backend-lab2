@@ -23,7 +23,4 @@ services:
     build: ../itmo-work-gateway
     image: itmo-work/gateway:e2e
 
-  application-service:
-    build: ../application-service
-    image: itmo-work/application-service:e2e
 

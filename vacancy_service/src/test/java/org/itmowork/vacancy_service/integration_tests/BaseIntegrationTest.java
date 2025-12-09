@@ -1,55 +1,59 @@
-package org.itmowork.e2etest;
+package org.itmowork.vacancy_service.integration_tests;
 
 import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import io.restassured.RestAssured;
-
 import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 
 @Testcontainers
-public abstract class BaseE2ETest {
+public abstract class BaseIntegrationTest {
 
     protected static final int GATEWAY_PORT = 8765;
-    protected String baseUrl;
+    protected static String baseUrl;
 
     @Container
     protected static final DockerComposeContainer<?> environment =
-            new DockerComposeContainer<>(new File("docker-compose.yml"))
+            new DockerComposeContainer<>(new File("docker-compose.test.yml"))
                     .withExposedService(
                             "itmo-work-gateway",
                             GATEWAY_PORT,
-                            Wait.forListeningPort()
+                            Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5))
+                    )
+                    .waitingFor(
+                            "itmo-work-gateway",
+                            Wait.forHttp("/api/vacancies")   // или /actuator/health
+                                    .forStatusCodeMatching(code -> code != 503)
                                     .withStartupTimeout(Duration.ofMinutes(5))
                     );
 
     @BeforeAll
-    static void waitForClusterReady() throws Exception {
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    static void init() throws Exception {
+        String host = environment.getServiceHost("itmo-work-gateway", GATEWAY_PORT);
+        Integer port = environment.getServicePort("itmo-work-gateway", GATEWAY_PORT);
+
+        baseUrl = "http://" + host + ":" + port;
+
         waitUntilUserServiceReady();
         waitUntilVacancyServiceReady();
-        Thread.sleep(60000);
     }
 
     private static void waitUntilVacancyServiceReady() throws Exception {
-        String host = environment.getServiceHost("itmo-work-gateway", GATEWAY_PORT);
-        Integer port = environment.getServicePort("itmo-work-gateway", GATEWAY_PORT);
-        String url = "http://" + host + ":" + port + "/api/vacancies";
+        String url = baseUrl + "/api/vacancies";
         for (int i = 0; i < 180; i++) {
             try {
                 int code = RestAssured.get(url).getStatusCode();
                 if (code != 503) {
-                    System.out.println("Vacancy-service is ready! Returned status: " + code);
+                    System.out.println("Vacancy-service is ready! Status: " + code);
                     return;
                 }
             } catch (Exception ignored) {}
@@ -58,15 +62,13 @@ public abstract class BaseE2ETest {
         throw new IllegalStateException("Vacancy-service did not become ready in time");
     }
 
-
     private static void waitUntilUserServiceReady() throws Exception {
-        String host = environment.getServiceHost("itmo-work-gateway", GATEWAY_PORT);
-        Integer port = environment.getServicePort("itmo-work-gateway", GATEWAY_PORT);
-        String url = "http://" + host + ":" + port + "/api/user/create";
+        String url = baseUrl + "/api/user/create";
         Map<String, Object> req = new HashMap<>();
         req.put("full_name", "HealthCheck User");
-        req.put("email", "healthcheck@test.com");
+        req.put("email", "healthcheck+" + UUID.randomUUID() + "@test.com");
         req.put("password", "123456");
+
         for (int i = 0; i < 180; i++) {
             try {
                 int status = given()
@@ -74,6 +76,7 @@ public abstract class BaseE2ETest {
                         .body(req)
                         .post(url)
                         .getStatusCode();
+
                 if (status != 503) {
                     return;
                 }
@@ -81,12 +84,5 @@ public abstract class BaseE2ETest {
             Thread.sleep(1000);
         }
         throw new IllegalStateException("User service did not become ready in time");
-    }
-
-    @BeforeEach
-    void setupBaseUrl() {
-        String host = environment.getServiceHost("itmo-work-gateway", GATEWAY_PORT);
-        Integer port = environment.getServicePort("itmo-work-gateway", GATEWAY_PORT);
-        this.baseUrl = "http://" + host + ":" + port;
     }
 }

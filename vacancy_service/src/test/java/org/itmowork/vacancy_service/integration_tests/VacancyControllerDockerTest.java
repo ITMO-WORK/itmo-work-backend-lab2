@@ -1,4 +1,4 @@
-package org.itmowork.e2etest;
+package org.itmowork.vacancy_service.integration_tests;
 
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.notNullValue;
 
-public class VacancyServiceTests extends BaseE2ETest {
+public class VacancyControllerDockerTest extends BaseIntegrationTest {
 
     public record CompanyRegistrationResult(String companyId, String userId) {
     }
@@ -20,7 +20,7 @@ public class VacancyServiceTests extends BaseE2ETest {
         req.put("email", "compa@example.com");
         req.put("description", "Some description");
         req.put("owner_full_name", "Owner Name");
-        req.put("owner_email", "owner@example.com");
+        req.put("owner_email", "owne@example.com");
         req.put("owner_password", "strong-password");
         var json =
                 given()
@@ -62,7 +62,7 @@ public class VacancyServiceTests extends BaseE2ETest {
     void fullVacancyFlowTest() {
         var reg = registerCompany();
         UUID companyId = UUID.fromString(reg.companyId);
-        UUID userId    = UUID.fromString(reg.userId);
+        UUID userId = UUID.fromString(reg.userId);
         String vacancyDraftId = createVacancy(companyId, userId, "draft");
         UUID vacancyUUID = UUID.fromString(vacancyDraftId);
         given()
@@ -124,5 +124,3 @@ public class VacancyServiceTests extends BaseE2ETest {
                 .body(notNullValue());
     }
 }
-
-
