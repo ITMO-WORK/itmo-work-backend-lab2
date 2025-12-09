@@ -1,6 +1,7 @@
 package org.itmowork.e2etest;
 
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.DockerComposeContainer;
@@ -13,6 +14,8 @@ import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+
+import static io.restassured.RestAssured.given;
 
 @Testcontainers
 public abstract class BaseE2ETest {
@@ -35,7 +38,7 @@ public abstract class BaseE2ETest {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
         waitUntilUserServiceReady();
         waitUntilVacancyServiceReady();
-        Thread.sleep(30000);
+        Thread.sleep(60000);
     }
 
     private static void waitUntilVacancyServiceReady() throws Exception {
@@ -66,8 +69,7 @@ public abstract class BaseE2ETest {
         req.put("password", "123456");
         for (int i = 0; i < 180; i++) {
             try {
-                int status = RestAssured
-                        .given()
+                int status = given()
                         .contentType(ContentType.JSON)
                         .body(req)
                         .post(url)

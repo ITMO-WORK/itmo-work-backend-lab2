@@ -9,40 +9,34 @@ import java.util.Map;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.notNullValue;
 
 public class E2eApplicationServiceTest extends BaseE2ETest{
 
     @Test
     void createApplication_success() {
-        JsonPath companyJson = registerCompany("Test company", "company@example.com");
-        UUID companyId = UUID.fromString(companyJson.getString("id"));
-        UUID ownerId   = UUID.fromString(companyJson.getString("user_id"));
+        var companyJson = registerCompany();
+        UUID companyId = UUID.fromString(companyJson.companyId());
+        UUID ownerId    = UUID.fromString(companyJson.userId);
 
         JsonPath candidateJson = registerUser(
                 "Candidate User",
-                "candidate@example.com",
+                "candida@example.com",
                 "candidate-password"
         );
         UUID candidateUserId = UUID.fromString(candidateJson.getString("id"));
 
-        JsonPath vacancyJson = createVacancy(
-                companyId,
-                ownerId,
-                "Java Developer",
-                "Write awesome Java code",
-                150,
-                200
-        );
-        UUID vacancyId = UUID.fromString(vacancyJson.getString("id"));
+        String vacancyDraftId = createVacancy(companyId, ownerId, "publish");
+        UUID vacancyUUID = UUID.fromString(vacancyDraftId);
 
 
         Map<String, Object> appReq = new HashMap<>();
-        appReq.put("coverLetter", "I am a strong Java developer");
+        appReq.put("cover_letter", "I am a strong Java developer");
 
         JsonPath appJson =
                 given()
                         .contentType(ContentType.JSON)
-                        .queryParam("vacancyId", vacancyId)
+                        .queryParam("vacancyId", vacancyDraftId)
                         .queryParam("userId", candidateUserId)
                         .body(appReq)
                         .when()
@@ -53,40 +47,46 @@ public class E2eApplicationServiceTest extends BaseE2ETest{
                         .jsonPath();
 
         UUID applicationId = UUID.fromString(appJson.getString("id"));
-        String status      = appJson.getString("statusName");
-        String coverLetter = appJson.getString("coverLetter");
+        String status      = appJson.getString("status");
+        String coverLetter = appJson.getString("cover_letter");
 
         System.out.println("applicationId = " + applicationId);
         System.out.println("status = " + status);
         System.out.println("coverLetter = " + coverLetter);
 
-        org.junit.jupiter.api.Assertions.assertEquals("NEW", status);
+        org.junit.jupiter.api.Assertions.assertEquals("new", status);
         org.junit.jupiter.api.Assertions.assertEquals("I am a strong Java developer", coverLetter);
     }
 
-    private JsonPath registerCompany(String name, String email) {
-        Map<String, Object> companyReq = new HashMap<>();
-        companyReq.put("name", name);
-        companyReq.put("email", email);
-        companyReq.put("description", "Some description");
-        companyReq.put("ownerFullName", "Owner Name");
-        companyReq.put("ownerEmail", "owner_" + email);
-        companyReq.put("ownerPassword", "strong-password");
+    public record CompanyRegistrationRes(String companyId, String userId) {
+    }
 
-        return given()
-                .contentType(ContentType.JSON)
-                .body(companyReq)
-                .when()
-                .post(baseUrl + "/api/company/register-company")
-                .then()
-                .statusCode(201)
-                .extract()
-                .jsonPath();
+    private CompanyRegistrationRes registerCompany() {
+        Map<String, Object> req = new HashMap<>();
+        req.put("name", "Test company");
+        req.put("email", "c@example.com");
+        req.put("description", "Some description");
+        req.put("owner_full_name", "Owner Name");
+        req.put("owner_email", "owner@example.com");
+        req.put("owner_password", "strong-password");
+        var json =
+                given()
+                        .contentType(ContentType.JSON)
+                        .body(req)
+                        .when()
+                        .post(baseUrl + "/api/company/register-company")
+                        .then()
+                        .statusCode(201)
+                        .extract()
+                        .jsonPath();
+        String companyId = json.getString("id");
+        String userId    = json.getString("user_id");
+        return new CompanyRegistrationRes(companyId, userId);
     }
 
     private JsonPath registerUser(String fullName, String email, String password) {
         Map<String, Object> userReq = new HashMap<>();
-        userReq.put("fullName", fullName);
+        userReq.put("full_name", fullName);
         userReq.put("email", email);
         userReq.put("password", password);
 
@@ -101,29 +101,24 @@ public class E2eApplicationServiceTest extends BaseE2ETest{
                 .jsonPath();
     }
 
-    private JsonPath createVacancy(UUID companyId,
-                                   UUID ownerUserId,
-                                   String title,
-                                   String description,
-                                   int salaryFrom,
-                                   int salaryTo) {
-
-        Map<String, Object> vacancyReq = new HashMap<>();
-        vacancyReq.put("title", title);
-        vacancyReq.put("description", description);
-        vacancyReq.put("salaryFrom", salaryFrom);
-        vacancyReq.put("salaryTo", salaryTo);
-        vacancyReq.put("companyId", companyId.toString());
-        vacancyReq.put("currencyId", 1L);
-
+    private String createVacancy(UUID companyId, UUID userId, String statusPath) {
+        Map<String, Object> req = new HashMap<>();
+        req.put("title", "Java Dveloper");
+        req.put("description", "Some esc");
+        req.put("salary_from", 10000);
+        req.put("salary_to", 20000);
+        req.put("company_id", companyId.toString());
+        req.put("currency_id", 1);
         return given()
                 .contentType(ContentType.JSON)
-                .body(vacancyReq)
+                .body(req)
                 .when()
-                .post(baseUrl + "/api/vacancies/" + ownerUserId + "/publish")
+                .post(baseUrl + "/api/vacancies/" + userId + "/" + statusPath)
                 .then()
                 .statusCode(201)
+                .body("id", notNullValue())
                 .extract()
-                .jsonPath();
+                .jsonPath()
+                .getString("id");
     }
 }

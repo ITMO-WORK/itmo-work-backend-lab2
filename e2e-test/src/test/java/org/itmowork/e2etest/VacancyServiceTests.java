@@ -17,7 +17,7 @@ public class VacancyServiceTests extends BaseE2ETest {
     private CompanyRegistrationResult registerCompany() {
         Map<String, Object> req = new HashMap<>();
         req.put("name", "Test company");
-        req.put("email", "company@example.com");
+        req.put("email", "compa@example.com");
         req.put("description", "Some description");
         req.put("owner_full_name", "Owner Name");
         req.put("owner_email", "owner@example.com");
