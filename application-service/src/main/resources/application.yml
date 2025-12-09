@@ -9,3 +9,17 @@ spring:
     property-naming-strategy: SNAKE_CASE
   config:
     import: configserver:${CONFIG_SERVER_URL:http://localhost:9991}
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: false

@@ -26,6 +26,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.retry:spring-retry:2.0.12")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 dependencyManagement {

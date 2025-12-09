@@ -38,6 +38,8 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.6.2")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    testImplementation("io.rest-assured:rest-assured:5.+")
 }
 
 dependencyManagement {

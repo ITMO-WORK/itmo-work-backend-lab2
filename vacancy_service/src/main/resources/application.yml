@@ -16,3 +16,17 @@ spring:
     activate:
       on-profile: ${PROFILE:dev}
 
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: false
+    

@@ -31,3 +31,17 @@ spring:
     activate:
       on-profile: ${SPRING_PROFILES_ACTIVE:dev}
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:9991}
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: false

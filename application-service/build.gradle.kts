@@ -44,9 +44,9 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.mapstruct:mapstruct:1.6.3")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
     implementation("org.springframework.retry:spring-retry:2.0.12")
     testImplementation("io.rest-assured:rest-assured:5.+")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.13")
 }
 
 dependencyManagement {
