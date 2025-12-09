@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import reactor.test.StepVerifier;
 
 import java.util.Optional;
@@ -25,6 +27,9 @@ public class UserServiceImplTest {
 
     @InjectMocks
     private UserServiceImpl userService;
+
+    @Mock
+    private TransactionTemplate transactionTemplate;
 
     private UUID userId;
     private User existingUser;
@@ -74,6 +79,34 @@ public class UserServiceImplTest {
 
         verify(userRepository).findUserByEmail("john@mail.com");
         verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void deleteUserSuccessTest(){
+        User userToDelete = User.builder()
+                .id(userId)
+                .fullName("Existing User")
+                .email("existing@mail.com")
+                .password("password")
+                .build();
+
+        when(transactionTemplate.execute(any()))
+                .thenAnswer(invocation -> {
+                    TransactionCallback<?> cb = invocation.getArgument(0);
+                    return cb.doInTransaction(null);
+                });
+
+        when(userRepository.deleteUserById(userId))
+                .thenReturn(Optional.of(userToDelete));
+
+        StepVerifier.create(userService.deleteUser(userId))
+                .expectNextMatches(response ->
+                        response.id().equals(userId) &&
+                                response.message().equals("Пользователь был успешно удален")
+                )
+                .verifyComplete();
+
+        verify(userRepository).deleteUserById(userId);
     }
 
     @Test

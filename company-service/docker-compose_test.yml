@@ -80,21 +80,6 @@ services:
     networks:
       - itmo
 
-  vacancy-service:
-    image: itmo-work/vacancy-service:e2e
-    depends_on:
-      postgres:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: prod
-      CONFIG_SERVER_URL: http://config-server:9991
-    networks:
-      - itmo
-
   itmo-work-gateway:
     image: itmo-work/gateway:e2e
     depends_on:

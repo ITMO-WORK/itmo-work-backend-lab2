@@ -1,6 +1,7 @@
 package com.itmowork.user_service.exception;
 
 import com.itmowork.user_service.exception.exceptions.UserAlreadyExistsException;
+import com.itmowork.user_service.exception.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +31,17 @@ public class GlobalExceptionHandler {
                 ProblemDetailsUtils.problemDetail(
                         HttpStatus.CONFLICT,
                         "User already exists",
+                        ex.getMessage(),
+                        exchange
+                ));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public Mono<ProblemDetail> handleUserNotFoundException(UserNotFoundException ex, ServerWebExchange exchange){
+        return Mono.just(
+                ProblemDetailsUtils.problemDetail(
+                        HttpStatus.NOT_FOUND,
+                        "User not found",
                         ex.getMessage(),
                         exchange
                 ));

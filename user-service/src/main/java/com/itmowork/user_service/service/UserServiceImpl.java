@@ -1,13 +1,17 @@
 package com.itmowork.user_service.service;
 
 import com.itmowork.user_service.dto.request.UserRequestDto;
+import com.itmowork.user_service.dto.response.UserDeleteResponseDto;
 import com.itmowork.user_service.dto.response.UserResponseDto;
 import com.itmowork.user_service.exception.exceptions.UserAlreadyExistsException;
+import com.itmowork.user_service.exception.exceptions.UserNotFoundException;
 import com.itmowork.user_service.model.User;
 import com.itmowork.user_service.repository.UserRepository;
 import com.itmowork.user_service.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -19,6 +23,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
     public Mono<UserResponseDto> createUser(UserRequestDto userRequestDto) {
@@ -35,9 +40,21 @@ public class UserServiceImpl implements UserService {
         })
                 .subscribeOn(Schedulers.boundedElastic());
     }
-
+    @Override
     public Mono<UserResponseDto> findUserById(UUID id) {
         return Mono.fromCallable(() -> userRepository.findUserById(id))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    @Transactional
+    public Mono<UserDeleteResponseDto> deleteUser(UUID id) {
+        return Mono.fromCallable(() ->
+                        transactionTemplate.execute(status -> {
+                            User user = userRepository.deleteUserById(id)
+                                    .orElseThrow(() -> new UserNotFoundException("Пользователь не был найден"));
+                            return new UserDeleteResponseDto(user.getId(), "Пользователь был успешно удален");
+                        }))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 

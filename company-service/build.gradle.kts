@@ -50,7 +50,6 @@ dependencies {
 
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
-	testImplementation("org.testcontainers:db2")
 	testImplementation("org.testcontainers:postgresql")
 	testImplementation("org.springframework.cloud:spring-cloud-starter-contract-stub-runner")
 
@@ -59,6 +58,7 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.retry:spring-retry:2.0.12")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+	testImplementation("io.rest-assured:rest-assured:5.+")
 }
 
 dependencyManagement {

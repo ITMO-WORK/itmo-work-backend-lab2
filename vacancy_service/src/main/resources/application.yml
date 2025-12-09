@@ -3,30 +3,12 @@ spring:
     name: vacancy-service
   profiles:
     active: ${PROFILE:dev}
-  jackson:
-    property-naming-strategy: SNAKE_CASE
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:9991}
-  liquibase:
-    change-log: classpath:/db/changelog/changelog-master.yml
 
 ---
 spring:
   config:
     activate:
       on-profile: ${PROFILE:dev}
-
-management:
-  endpoint:
-    health:
-      show-details: always
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: false
     

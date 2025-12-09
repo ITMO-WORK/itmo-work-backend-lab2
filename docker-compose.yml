@@ -3,9 +3,9 @@ services:
     image: postgres:17
     container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: itm-main
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -29,8 +29,8 @@ services:
     environment:
       CONFIG_REPO_URI: https://github.com/ITMO-WORK/itmo-work-configs-repo-lab2
 #      !!! use env file or insert here your credentials
-      USERNAME: kkettch
-      PASSWORD: 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
+      USERNAME: ${USERNAME}
+      PASSWORD: ${PASSWORD}
     volumes:
       - ./config-repo-cache:/tmp/config-repo
     healthcheck:
@@ -87,8 +87,6 @@ services:
       SPRING_CLOUD_CONFIG_RETRY_MULTIPLIER: "1.5"
       SPRING_CLOUD_CONFIG_RETRY_MAX_INTERVAL: "10000"
 
-#
-#
   company-service:
     build: ./company-service
     container_name: company-service
@@ -109,9 +107,7 @@ services:
       SPRING_CLOUD_CONFIG_RETRY_INITIAL_INTERVAL: "1000"
       SPRING_CLOUD_CONFIG_RETRY_MULTIPLIER: "1.5"
       SPRING_CLOUD_CONFIG_RETRY_MAX_INTERVAL: "10000"
-#
-#
-#
+
   user-service:
     build: ./user-service
     container_name: user-service
@@ -126,7 +122,6 @@ services:
       - itmo
     environment:
       PROFILE: prod
-      SPRING_PROFILES_ACTIVE: prod
       CONFIG_SERVER_URL: http://config-server:9991
       SPRING_CLOUD_CONFIG_FAILFAST: "true"
       SPRING_CLOUD_CONFIG_RETRY_MAX_ATTEMPTS: "10"
@@ -165,8 +160,8 @@ services:
       - itmo
     environment:
       PROFILE: prod
-      SPRING_PROFILES_ACTIVE: prod
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      CONFIG_SERVER_URL: http://config-server:9991
 
 networks:
   itmo:

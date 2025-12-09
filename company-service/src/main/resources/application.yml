@@ -1,47 +1,13 @@
 server:
   port: 0
 
-logging:
-  level:
-    io.github.resilience4j.circuitbreaker: DEBUG
-    io.github.resilience4j.core: DEBUG
-resilience4j:
-  circuitbreaker:
-    instances:
-      userClientCB:
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10s
-        permittedNumberOfCallsInHalfOpenState: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-        event-consumer-buffer-size: 10
-        record-exceptions:
-          - com.itmowork.company_service.exception.exceptions.UserClientException
-          - feign.FeignException
 spring:
   application:
     name: company-service
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
-  jackson:
-    property-naming-strategy: SNAKE_CASE
 
   config:
     activate:
       on-profile: ${SPRING_PROFILES_ACTIVE:dev}
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:9991}
-
-management:
-  endpoint:
-    health:
-      show-details: always
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: false

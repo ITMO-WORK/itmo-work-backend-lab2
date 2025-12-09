@@ -1,6 +1,7 @@
 package com.itmowork.user_service.controller;
 
 import com.itmowork.user_service.dto.request.UserRequestDto;
+import com.itmowork.user_service.dto.response.UserDeleteResponseDto;
 import com.itmowork.user_service.dto.response.UserResponseDto;
 import com.itmowork.user_service.service.interfaces.UserService;
 import jakarta.validation.Valid;
@@ -30,5 +31,12 @@ public class UserController {
     @GetMapping("/{id}")
     public Mono<UserResponseDto> findUserById(@PathVariable UUID id){
         return userService.findUserById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<UserDeleteResponseDto>> deleteUser(@PathVariable UUID id){
+        return userService.deleteUser(id)
+                .map(userDeleteResponseDtoMono ->
+                        ResponseEntity.status(HttpStatus.OK).body(userDeleteResponseDtoMono));
     }
 }
