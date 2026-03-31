@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import org.itmowork.vacancy_service.service.interfaces.CurrencyService;
 import org.itmowork.vacancy_service.service.interfaces.VacancyStatusService;
+import org.junit.jupiter.api.Tag;
 import org.springframework.transaction.annotation.Transactional;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,6 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.cloud.openfeign.client.config.company-service.url=http://localhost:9999",
         "spring.cloud.openfeign.client.config.vacancy-service.url=http://localhost:9999"
 })
+@Tag("integration")
 class VacancyControllerIntegrationTest {
 
     @Autowired

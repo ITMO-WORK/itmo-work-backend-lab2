@@ -4,6 +4,7 @@ import com.itmowork.user_service.dto.request.UserRequestDto;
 import com.itmowork.user_service.model.User;
 import com.itmowork.user_service.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.cloud.discovery.enabled=false",
         "eureka.client.enabled=false"
 })
+@Tag("integration")
 public class UserServiceControllerTest {
 
     @Container

@@ -6,6 +6,7 @@ import com.itmowork.company_service.dto.request.CompanyRequestDto;
 import com.itmowork.company_service.dto.request.CompanyUpdateRequestDto;
 import com.itmowork.company_service.repository.CompanyRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -37,6 +38,7 @@ import java.nio.charset.StandardCharsets;
         "spring.cloud.openfeign.client.config.user-service.url=http://localhost:${wiremock.server.port}",
 
 })
+@Tag("integration")
 public class CompanyControllerTest {
 
 

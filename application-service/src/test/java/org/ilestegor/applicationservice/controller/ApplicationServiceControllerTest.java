@@ -10,6 +10,7 @@ import org.ilestegor.applicationservice.model.ApplicationStatusName;
 import org.ilestegor.applicationservice.repository.ApplicationStatusRepository;
 import org.ilestegor.applicationservice.repository.ApplicationRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.cloud.discovery.enabled=false",
         "eureka.client.enabled=false"
 })
+@Tag("integration")
 public class ApplicationServiceControllerTest {
 
     @Container
